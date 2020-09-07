@@ -1,0 +1,32 @@
+version: '1'
+
+project: kube
+
+guests:
+  master:
+    hostanme: master.local
+    image: centos7
+    cores: 2
+    memory: 2048
+    disks:
+      vda: 10G
+    interfaces:
+      eth0: 'network=default'
+  worker1:
+    hostanme: worker1.local
+    image: centos7
+    cores: 2
+    memory: 4096
+    disks:
+      vda: 10G
+    interfaces:
+      eth0: 'network=default'
+  worker2:
+    hostanme: worker2.local
+    image: centos7
+    cores: 2
+    memory: 4096
+    disks:
+      vda: 10G
+    interfaces:
+      eth0: 'network=default'

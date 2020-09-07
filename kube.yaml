@@ -1,0 +1,43 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: repos
+    yum:
+      name:
+      - epel-release
+      - https://yum.puppet.com/puppet6-release-el-7.noarch.rpm
+  - name: packages
+    yum:
+      name:
+      - git
+      - vim
+      - tree
+      - puppet-agent
+      - container-selinux
+      - selinux-policy-base
+      state: present
+  - name: kube repo
+    copy:
+      src: ./files/kubernetes.repo
+      dest: /etc/yum.repos.d/kubernetes.repo
+      mode: preserve
+- hosts: '*master'
+  become: yes
+  tasks:
+  - name: install components
+    yum:
+      name:
+      - docker
+      - kubeadm
+  - name: docker service
+    service:
+      name: docker
+      state: started
+      enabled: true
+  - name: kubelet service
+    service:
+      name: kubelet
+      state: started
+      enabled: true
+

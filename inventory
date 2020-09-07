@@ -1,0 +1,11 @@
+all:
+  hosts:
+    kube-master:
+      ansible_host: 192.168.122.50
+    kube-worker1:
+      ansible_host: 192.168.122.38
+    kube-worker2:
+      ansible_host: 192.168.122.232
+  vars:
+    ansible_user: cloud
+
