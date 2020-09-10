@@ -6,38 +6,63 @@
     yum:
       name:
       - epel-release
-      - https://yum.puppet.com/puppet6-release-el-7.noarch.rpm
   - name: packages
     yum:
       name:
       - git
       - vim
       - tree
-      - puppet-agent
       - container-selinux
       - selinux-policy-base
       state: present
-  - name: kube repo
+  - name: docker repo
+    copy:
+      src: ./files/docker-ce.repo
+      dest: /etc/yum.repos.d/
+      mode: preserve
+  - name: kubernetes repo
     copy:
       src: ./files/kubernetes.repo
-      dest: /etc/yum.repos.d/kubernetes.repo
+      dest: /etc/yum.repos.d/
       mode: preserve
-- hosts: '*master'
-  become: yes
-  tasks:
-  - name: install components
+  - name: containerd.conf
+    copy:
+      src: ./files/containerd.conf
+      dest: /etc/modules-load.d/
+  - name: load overlay module
+    modprobe:
+      name: overlay
+  - name: load br_netfilter module
+    modprobe:
+      name: br_netfilter
+  - name: sysctl
+    copy:
+      src: files/99-kubernetes-cri.conf 
+      dest: /etc/sysctl.d/
+    register: sysctl
+  - name: sysctl reload
+    shell: sysctl --system
+    when: sysctl.changed
+  - name: install containerd components
     yum:
       name:
-      - docker
-      - kubeadm
-  - name: docker service
+      - containerd.io
+      state: present
+  - name: containerd service
     service:
-      name: docker
+      name: containerd
       state: started
       enabled: true
+- hosts: '*control'
+  become: yes
+  tasks:
+  - name: install control components
+    yum:
+      name:
+      - kubeadm
+      state: present
   - name: kubelet service
     service:
       name: kubelet
       state: started
       enabled: true
-

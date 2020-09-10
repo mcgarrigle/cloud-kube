@@ -3,8 +3,8 @@ version: '1'
 project: kube
 
 guests:
-  master:
-    hostanme: master.local
+  control:
+    hostanme: control.local
     image: centos7
     cores: 2
     memory: 2048
