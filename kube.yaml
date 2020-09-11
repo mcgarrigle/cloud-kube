@@ -46,21 +46,23 @@
   - name: install containerd components
     yum:
       name:
+      - docker-ce
+      - docker-ce-cli
       - containerd.io
       state: present
-  - name: containerd service
+  - name: docker service
     service:
-      name: containerd
+      name: docker
       state: started
       enabled: true
-- hosts: '*control'
-  become: yes
-  tasks:
   - name: install control components
     yum:
       name:
       - kubeadm
       state: present
+- hosts: '*control'
+  become: yes
+  tasks:
   - name: kubelet service
     service:
       name: kubelet
