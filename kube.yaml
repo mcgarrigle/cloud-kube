@@ -4,11 +4,11 @@
   tasks:
   - name: include docker
     include: docker.yaml
-  - name: repos
+  - name: base repos
     yum:
       name:
       - epel-release
-  - name: packages
+  - name: base packages
     yum:
       name:
       - git
@@ -23,13 +23,37 @@
   - name: install control components
     yum:
       name:
+      - kubelet
       - kubeadm
       state: present
-- hosts: '*control'
+
+- hosts: 'kube-control'
   become: yes
   tasks:
+  - name: bash profile
+    copy:
+      src: ./files/bash_profile
+      dest: /root/.bash_profile
   - name: kubelet service
     service:
       name: kubelet
       state: started
       enabled: true
+  - name: kubeadm init
+    command: kubeadm init
+    args:
+      creates: '/etc/kubernetes/admin.conf'
+  - name: get token 
+    shell: "kubeadm token create --print-join-command | tail -1"
+    register: join
+  - name: set facts
+    set_fact:
+      join: "{{ join.stdout }}"
+
+- hosts: 'kube-worker*'
+  become: yes
+  tasks:
+  - name: join cluster
+    command: "{{ hostvars['kube-control']['join'] }}"
+    args:
+      creates: '/etc/kubernetes/pki/ca.crt'
