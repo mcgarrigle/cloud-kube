@@ -2,6 +2,8 @@
 - hosts: all
   become: yes
   tasks:
+  - name: include docker
+    include: docker.yaml
   - name: repos
     yum:
       name:
@@ -12,49 +14,12 @@
       - git
       - vim
       - tree
-      - container-selinux
-      - selinux-policy-base
       state: present
-  - name: docker repo
-    copy:
-      src: ./files/docker-ce.repo
-      dest: /etc/yum.repos.d/
-      mode: preserve
   - name: kubernetes repo
     copy:
       src: ./files/kubernetes.repo
       dest: /etc/yum.repos.d/
       mode: preserve
-  - name: containerd.conf
-    copy:
-      src: ./files/containerd.conf
-      dest: /etc/modules-load.d/
-  - name: load overlay module
-    modprobe:
-      name: overlay
-  - name: load br_netfilter module
-    modprobe:
-      name: br_netfilter
-  - name: sysctl
-    copy:
-      src: files/99-kubernetes-cri.conf 
-      dest: /etc/sysctl.d/
-    register: sysctl
-  - name: sysctl reload
-    shell: sysctl --system
-    when: sysctl.changed
-  - name: install containerd components
-    yum:
-      name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      state: present
-  - name: docker service
-    service:
-      name: docker
-      state: started
-      enabled: true
   - name: install control components
     yum:
       name:
