@@ -1,0 +1,14 @@
+
+cloud down
+cloud up
+
+clear
+while cloud ls; do
+  # echo '-----------------------'
+  sleep 1
+  tput cup 0 0 
+done
+
+cloud inv > inventory.yaml
+ansible-playbook -i inventory.yaml /opt/cloud/playbooks/commission.yaml
+ansible-playbook -i inventory.yaml -l kube-control kube.yaml

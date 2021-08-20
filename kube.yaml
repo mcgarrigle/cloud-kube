@@ -2,12 +2,18 @@
 - hosts: all
   become: yes
   tasks:
+
+  - name: firewalld is disabled
+    systemd: name=firewalld enabled=no state=stopped
+
   - name: include docker
-    include: docker.yaml
+    include: docker-driver.yaml
+
   - name: base repos
     yum:
       name:
       - epel-release
+
   - name: base packages
     yum:
       name:
@@ -15,11 +21,13 @@
       - vim
       - tree
       state: present
+
   - name: kubernetes repo
     copy:
       src: ./files/kubernetes.repo
       dest: /etc/yum.repos.d/
       mode: preserve
+
   - name: install control components
     yum:
       name:
@@ -27,32 +35,61 @@
       - kubeadm
       state: present
 
+  - name: docker config
+    copy:
+      src: ./files/daemon.json
+      dest: /etc/docker/daemon.json
+    notify:
+      - restart docker
+
+  handlers:
+
+    - name: restart docker
+      service:
+        name: docker
+        state: restarted
+
+# ---------------------------------------------
+
 - hosts: 'kube-control'
   become: yes
   tasks:
+
   - name: bash profile
     copy:
       src: ./files/bash_profile
       dest: /root/.bash_profile
+
+  - name: kubeadm config
+    copy:
+      src: ./files/kubeadm-config.yaml
+      dest: /etc/kubeadm-config.yaml
+
   - name: kubelet service
     service:
       name: kubelet
       state: started
       enabled: true
+
   - name: kubeadm init
-    command: kubeadm init
+    command: kubeadm init --config /etc/kubeadm-config.yaml
     args:
       creates: '/etc/kubernetes/admin.conf'
+           
   - name: get token 
     shell: "kubeadm token create --print-join-command | tail -1"
     register: join
+
   - name: set facts
     set_fact:
       join: "{{ join.stdout }}"
 
+# ---------------------------------------------
+
 - hosts: 'kube-worker*'
   become: yes
   tasks:
+
   - name: join cluster
     command: "{{ hostvars['kube-control']['join'] }}"
     args:

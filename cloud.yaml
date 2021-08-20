@@ -1,32 +1,35 @@
-version: '1'
+version: '2'
 
 project: kube
 
 guests:
   control:
     hostanme: control.local
-    image: centos7
+    os: centos7
+    initialise: clone
     cores: 2
-    memory: 2048
+    memory: 4096
     disks:
       vda: 10G
     interfaces:
-      eth0: 'network=default'
+      eth0: 'bridge=br0'
   worker1:
     hostanme: worker1.local
-    image: centos7
-    cores: 2
+    os: centos7
+    initialise: clone
+    cores: 4
     memory: 4096
     disks:
-      vda: 10G
+      vda: 80G
     interfaces:
-      eth0: 'network=default'
+      eth0: 'bridge=br0'
   worker2:
     hostanme: worker2.local
-    image: centos7
-    cores: 2
+    os: centos7
+    initialise: clone
+    cores: 4
     memory: 4096
     disks:
-      vda: 10G
+      vda: 80G
     interfaces:
-      eth0: 'network=default'
+      eth0: 'bridge=br0'

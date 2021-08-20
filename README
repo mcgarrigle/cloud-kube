@@ -1,0 +1,12 @@
+BRING UP CLUSTER
+
+cloud up
+cloud inv > inventory.yaml
+ansible-playbook -i inventory.yaml  /opt/cloud/playbooks/commission.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+kubectl describe nodes
+
+kubectl logs -n kube-system kube-flannel-ds-cnh8p
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/main/content/en/examples/application/deployment.yaml

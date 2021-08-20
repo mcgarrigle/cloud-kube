@@ -5,29 +5,13 @@
       - container-selinux
       - selinux-policy-base
       state: present
+
   - name: docker repo
     copy:
       src: ./files/docker-ce.repo
       dest: /etc/yum.repos.d/
       mode: preserve
-  - name: containerd.conf
-    copy:
-      src: ./files/containerd.conf
-      dest: /etc/modules-load.d/
-  - name: load overlay module
-    modprobe:
-      name: overlay
-  - name: load br_netfilter module
-    modprobe:
-      name: br_netfilter
-  - name: sysctl
-    copy:
-      src: files/99-kubernetes-cri.conf 
-      dest: /etc/sysctl.d/
-    register: sysctl
-  - name: sysctl reload
-    shell: sysctl --system
-    when: sysctl.changed
+
   - name: install docker components
     yum:
       name:
@@ -35,6 +19,7 @@
       - docker-ce-cli
       - containerd.io
       state: present
+      
   - name: docker service
     service:
       name: docker
