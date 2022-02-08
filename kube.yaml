@@ -3,6 +3,21 @@
   become: yes
   tasks:
 
+  - name: remove libvirt nameserver
+    lineinfile:
+      path: /etc/resolv.conf
+      regexp: '^nameserver 192.168.122.1'
+      state: absent
+
+  - name: Add IP address of all hosts to all hosts
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '.*{{ item }}$'
+      line: "{{ hostvars[item].ansible_host }} {{item}}"
+      state: present
+    when: hostvars[item].ansible_host is defined
+    with_items: "{{ groups.all }}"
+
   - name: firewalld is disabled
     systemd: name=firewalld enabled=no state=stopped
 
@@ -51,7 +66,7 @@
 
 # ---------------------------------------------
 
-- hosts: 'kube-control'
+- hosts: 'control'
   become: yes
   tasks:
 
@@ -86,11 +101,11 @@
 
 # ---------------------------------------------
 
-- hosts: 'kube-worker*'
+- hosts: 'worker*'
   become: yes
   tasks:
 
   - name: join cluster
-    command: "{{ hostvars['kube-control']['join'] }}"
+    command: "{{ hostvars['control']['join'] }}"
     args:
       creates: '/etc/kubernetes/pki/ca.crt'

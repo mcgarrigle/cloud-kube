@@ -1,35 +1,65 @@
-version: '2'
+version: '3'
 
 project: kube
 
 guests:
+
   control:
-    hostanme: control.local
-    os: centos7
-    initialise: clone
+    hostname: control
+    os: cloud8
+    initialise: cloud
     cores: 2
     memory: 4096
     disks:
       vda: 10G
     interfaces:
-      eth0: 'bridge=br0'
+      enp1s0: 
+        connection: 'bridge=br0'
+        bootproto: static
+        address: 192.168.2.21/24
+        gateway: 192.168.2.1
+    nameserver:
+      address:
+        - 192.168.2.1
+      search:
+        - mac.wales
+
   worker1:
-    hostanme: worker1.local
-    os: centos7
-    initialise: clone
+    hostname: worker1
+    os: cloud8
+    initialise: cloud
     cores: 4
     memory: 4096
     disks:
       vda: 80G
     interfaces:
-      eth0: 'bridge=br0'
+      enp1s0: 
+        connection: 'bridge=br0'
+        bootproto: static
+        address: 192.168.2.22/24
+        gateway: 192.168.2.1
+    nameserver:
+      address:
+        - 192.168.2.1
+      search:
+        - mac.wales
+
   worker2:
-    hostanme: worker2.local
-    os: centos7
-    initialise: clone
+    hostname: worker2
+    os: cloud8
+    initialise: cloud
     cores: 4
     memory: 4096
     disks:
       vda: 80G
     interfaces:
-      eth0: 'bridge=br0'
+      enp1s0: 
+        connection: 'bridge=br0'
+        bootproto: static
+        address: 192.168.2.23/24
+        gateway: 192.168.2.1
+    nameserver:
+      address:
+        - 192.168.2.1
+      search:
+        - mac.wales
